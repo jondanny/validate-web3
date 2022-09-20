@@ -11,7 +11,10 @@ export class Web3Controller {
   }
 
   @Post('send-initial-matic')
-  async sendInitialMatic(@Body('address') address: string, @Body('amount') amount: number): Promise<string | void> {
+  async sendInitialMatic(
+    @Body('address') address: string,
+    @Body('amount') amount: number,
+  ): Promise<string | void> {
     return this.web3Service.sendInitialMatic(address, amount);
   }
 }
