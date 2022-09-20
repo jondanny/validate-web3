@@ -15,10 +15,7 @@ export class Web3Service {
   private nftContractAddress;
   private marketContractAddress;
 
-  constructor(
-    @Inject(WEB3_PROVIDER_TOKEN) public web3: AlchemyWeb3,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(@Inject(WEB3_PROVIDER_TOKEN) public web3: AlchemyWeb3, private readonly configService: ConfigService) {
     this.blixNft1155Contract = new web3.eth.Contract(
       BlixNft1155ContractAbi as AbiItem[],
       this.configService.get('web3Config.nftContractAddress'),
@@ -27,22 +24,14 @@ export class Web3Service {
       blixMarketContractAbi as AbiItem[],
       this.configService.get('web3Config.marketContractAddress'),
     );
-    this.companyAccount = this.web3.eth.accounts.privateKeyToAccount(
-      this.configService.get('web3Config.privateKey'),
-    );
-    this.nftContractAddress = this.configService.get(
-      'web3Config.nftContractAddress',
-    );
-    this.marketContractAddress = this.configService.get(
-      'web3Config.marketContractAddress',
-    );
+    this.companyAccount = this.web3.eth.accounts.privateKeyToAccount(this.configService.get('web3Config.privateKey'));
+    this.nftContractAddress = this.configService.get('web3Config.nftContractAddress');
+    this.marketContractAddress = this.configService.get('web3Config.marketContractAddress');
   }
 
   async getMaticBalance(address: string): Promise<number> {
     try {
-      const res = this.web3.utils.fromWei(
-        await this.web3.eth.getBalance(address),
-      );
+      const res = this.web3.utils.fromWei(await this.web3.eth.getBalance(address));
 
       return Number.parseFloat(res);
     } catch (error) {
@@ -52,9 +41,7 @@ export class Web3Service {
 
   async mint(metadataUri: string, amount: number): Promise<number> {
     try {
-      const txnData = this.blixNft1155Contract.methods
-        .mint(metadataUri, amount)
-        .encodeABI();
+      const txnData = this.blixNft1155Contract.methods.mint(metadataUri, amount).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.nftContractAddress,
@@ -73,13 +60,9 @@ export class Web3Service {
         this.companyAccount.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
 
-      const currentId = await this.blixNft1155Contract.methods
-        .currentId()
-        .call();
+      const currentId = await this.blixNft1155Contract.methods.currentId().call();
 
       return currentId;
     } catch (error) {
@@ -89,9 +72,7 @@ export class Web3Service {
 
   async mintBatch(metadataUris: string[], amounts: number[]): Promise<void> {
     try {
-      const txnData = this.blixNft1155Contract.methods
-        .mintBatch(metadataUris, amounts)
-        .encodeABI();
+      const txnData = this.blixNft1155Contract.methods.mintBatch(metadataUris, amounts).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.blixNft1155Contract,
@@ -110,9 +91,7 @@ export class Web3Service {
         this.companyAccount.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
@@ -120,9 +99,7 @@ export class Web3Service {
 
   async burn(tokenId: number, amount: number): Promise<void> {
     try {
-      const txnData = this.blixNft1155Contract.methods
-        .burn(tokenId, amount)
-        .encodeABI();
+      const txnData = this.blixNft1155Contract.methods.burn(tokenId, amount).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.nftContractAddress,
@@ -141,9 +118,7 @@ export class Web3Service {
         this.companyAccount.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
@@ -164,10 +139,7 @@ export class Web3Service {
 
   async sendInitialMatic(address: string, amount: number): Promise<void> {
     try {
-      const nonce = await this.web3.eth.getTransactionCount(
-        this.companyAccount.address,
-        'latest',
-      );
+      const nonce = await this.web3.eth.getTransactionCount(this.companyAccount.address, 'latest');
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: address,
@@ -186,9 +158,7 @@ export class Web3Service {
         this.companyAccount.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
@@ -196,13 +166,9 @@ export class Web3Service {
 
   async setApproval(privateKey: string): Promise<void> {
     try {
-      const account = await this.web3.eth.accounts.privateKeyToAccount(
-        privateKey,
-      );
+      const account = await this.web3.eth.accounts.privateKeyToAccount(privateKey);
 
-      const txnData = this.blixNft1155Contract.methods
-        .setApprovalForAll(this.marketContractAddress, true)
-        .encodeABI();
+      const txnData = this.blixNft1155Contract.methods.setApprovalForAll(this.marketContractAddress, true).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.nftContractAddress,
@@ -221,23 +187,15 @@ export class Web3Service {
         account.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
   }
 
-  async buyFromPrimaryMarket(
-    buyer: string,
-    tokenId: number,
-    amount: number,
-  ): Promise<void> {
+  async buyFromPrimaryMarket(buyer: string, tokenId: number, amount: number): Promise<void> {
     try {
-      const txnData = this.blixMarketContract.methods
-        .buyFromPrimaryMarket(buyer, tokenId, amount)
-        .encodeABI();
+      const txnData = this.blixMarketContract.methods.buyFromPrimaryMarket(buyer, tokenId, amount).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.marketContractAddress,
@@ -256,26 +214,17 @@ export class Web3Service {
         this.companyAccount.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
   }
 
-  async putOnSale(
-    privateKey: string,
-    tokenId: number,
-    amount: number,
-    price: number,
-  ): Promise<number> {
+  async putOnSale(privateKey: string, tokenId: number, amount: number, price: number): Promise<number> {
     try {
       this.setApproval(privateKey);
 
-      const seller = await this.web3.eth.accounts.privateKeyToAccount(
-        privateKey,
-      );
+      const seller = await this.web3.eth.accounts.privateKeyToAccount(privateKey);
 
       const txnData = this.blixMarketContract.methods
         .putOnSale(tokenId, amount, this.web3.utils.toWei(`${price}`))
@@ -298,13 +247,9 @@ export class Web3Service {
         seller.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
 
-      const marketItemId = await this.blixMarketContract.methods
-        .currentItemId()
-        .call();
+      const marketItemId = await this.blixMarketContract.methods.currentItemId().call();
 
       return marketItemId;
     } catch (error) {
@@ -314,13 +259,9 @@ export class Web3Service {
 
   async putOffSale(privateKey: string, itemId: number): Promise<void> {
     try {
-      const seller = await this.web3.eth.accounts.privateKeyToAccount(
-        privateKey,
-      );
+      const seller = await this.web3.eth.accounts.privateKeyToAccount(privateKey);
 
-      const txnData = this.blixMarketContract.methods
-        .putOffSale(itemId)
-        .encodeABI();
+      const txnData = this.blixMarketContract.methods.putOffSale(itemId).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.marketContractAddress,
@@ -339,23 +280,15 @@ export class Web3Service {
         seller.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
   }
 
-  async changePrice(
-    privateKey: string,
-    itemId: number,
-    price: number,
-  ): Promise<void> {
+  async changePrice(privateKey: string, itemId: number, price: number): Promise<void> {
     try {
-      const seller = await this.web3.eth.accounts.privateKeyToAccount(
-        privateKey,
-      );
+      const seller = await this.web3.eth.accounts.privateKeyToAccount(privateKey);
 
       const txnData = this.blixMarketContract.methods
         .changePrice(itemId, this.web3.utils.toWei(`${price}`))
@@ -378,27 +311,17 @@ export class Web3Service {
         seller.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
   }
 
-  async buyFromSecondaryMarket(
-    privateKey: string,
-    itemId: number,
-    price: number,
-  ): Promise<void> {
+  async buyFromSecondaryMarket(privateKey: string, itemId: number, price: number): Promise<void> {
     try {
-      const buyer = await this.web3.eth.accounts.privateKeyToAccount(
-        privateKey,
-      );
+      const buyer = await this.web3.eth.accounts.privateKeyToAccount(privateKey);
 
-      const txnData = await this.blixMarketContract.methods
-        .buyFromSecondaryMarket(itemId)
-        .encodeABI();
+      const txnData = await this.blixMarketContract.methods.buyFromSecondaryMarket(itemId).encodeABI();
 
       const estimatedGas = await this.web3.eth.estimateGas({
         to: this.marketContractAddress,
@@ -419,9 +342,7 @@ export class Web3Service {
         buyer.privateKey,
       );
 
-      await this.web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction,
-      );
+      await this.web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
     } catch (error) {
       throw error;
     }
