@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { EnvHelper } from './helpers/env.helper';
+import { EnvHelper } from './common/helpers/env.helper';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Web3Module } from './web3/web3.module';
 import web3Config from './config/web3.config';
+import databaseConfig from './config/database.config';
 
 EnvHelper.verifyNodeEnv();
 
@@ -13,7 +14,7 @@ EnvHelper.verifyNodeEnv();
     ConfigModule.forRoot({
       envFilePath: EnvHelper.getEnvFilePath(),
       isGlobal: true,
-      load: [web3Config],
+      load: [web3Config, databaseConfig],
     }),
     Web3Module,
   ],
