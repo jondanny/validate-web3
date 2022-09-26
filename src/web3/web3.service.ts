@@ -6,6 +6,9 @@ import { BlixNft1155ContractAbi } from './abi/BlixNft1155ContractAbi';
 import { blixMarketContractAbi } from './abi/BlixMarketContractAbi';
 import { Wallet } from './types/wallet.interface';
 import { WEB3_PROVIDER_TOKEN } from './web3.types';
+import { domainMumbai } from './domains/mumbai';
+import { domainType } from './types/domain.type';
+import { metaTransactionType } from './types/meta-transaction.type';
 
 @Injectable()
 export class Web3Service {
